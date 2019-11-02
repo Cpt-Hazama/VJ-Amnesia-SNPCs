@@ -1,0 +1,9 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/amnesia/engineer/engineer"
+	$bumpmap "models/cpthazama/amnesia/engineer/engineer_n"
+	$phong 1
+	$PhongExponent 1
+	$phongboost 0.5
+	$phongfresnelranges "[0.05 0.5 1]"
+}

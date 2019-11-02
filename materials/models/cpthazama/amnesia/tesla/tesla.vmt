@@ -1,0 +1,12 @@
+"VertexlitGeneric"
+{
+	"$basetexture" "models/cpthazama/amnesia/tesla/tesla"
+	$halflambert 1
+	$selfillum 1
+	$selfillumtint	"[1 6 10]"
+	$bumpmap "models/cpthazama/amnesia/tesla/tesla_n"
+	$phong 1
+	$PhongExponent 1
+	$phongboost 0.5
+	$phongfresnelranges "[0.05 0.5 1]"
+}
