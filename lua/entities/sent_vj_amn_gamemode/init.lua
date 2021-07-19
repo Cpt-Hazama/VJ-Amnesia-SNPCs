@@ -16,9 +16,15 @@ function ENT:Initialize()
 	self:SetNotSolid(true)
 	for _,v in pairs(ents.FindByClass(self:GetClass())) do
 		if IsValid(v) && v != self then
+			PrintMessage(HUD_PRINTTALK,"Only one gamemode entity can be spawned at a time!")
 			self:Remove()
 			break
 		end
+	end
+	if !navmesh then
+		PrintMessage(HUD_PRINTTALK,"No Nav-Mesh detected! It is required for item/monster spawning!")
+		self:Remove()
+		return
 	end
 
 	self:SetNW2Int("ItemCount",0)
@@ -45,7 +51,7 @@ function ENT:Initialize()
 
 	for i = 1,self.ItemCount do
 		local item = ents.Create("sent_vj_amn_item")
-		item:SetPos(VJ.FindHiddenNavArea())
+		item:SetPos(Amn_FindHiddenNavArea())
 		item:Spawn()
 		table.insert(self.Items,item)
 		self:DeleteOnRemove(item)
@@ -75,11 +81,11 @@ function ENT:Initialize()
 		if !IsValid(monster) then -- Kaernk probably couldn't spawn, try another monster
 			monster = ents.Create(PickMonster())
 		end
-		local pos = VJ.FindHiddenNavArea(selected == "npc_vj_amn_kaernk")
+		local pos = Amn_FindHiddenNavArea(true,selected == "npc_vj_amn_kaernk")
 		if pos == false then
 			SafeRemoveEntity(monster)
 			monster = ents.Create(PickMonster())
-			pos = VJ.FindHiddenNavArea()
+			pos = Amn_FindHiddenNavArea(true)
 			if !IsValid(monster) then return end
 		end
 		monster:SetPos(pos)
@@ -108,6 +114,7 @@ function ENT:Initialize()
 					obj:SetControlledNPC(v)
 					obj:Spawn()
 					obj:StartControlling()
+					obj.VJC_Player_CanExit = false
 					controlled = true
 					break
 				end
@@ -168,7 +175,11 @@ function ENT:Think()
 	local players_alive = 0
 	for _,v in pairs(ents.GetAll()) do
 		if (v:IsPlayer() && v:GetMoveType() != MOVETYPE_OBSERVER) or v.VJ_AmnesiaBot then
-			if v:IsPlayer() then v:StripWeapons() end
+			if v:IsPlayer() then
+				if math.random(1,2) == 1 then self:SetPos(v:GetPos()) end -- Prevent HUD from soft-locking
+				v:StripWeapons()
+				v:SetRunSpeed(v:GetWalkSpeed())
+			end
 			players_alive = players_alive +1
 		end
 	end

@@ -11,6 +11,7 @@ ENT.HullType = HULL_HUMAN
 ---------------------------------------------------------------------------------------------------------------------------------------------
 ENT.BloodColor = "Red" -- The blood type, this will determine what it should use (decal, particle, etc.)
 ENT.VJ_NPC_Class = {"CLASS_AMNESIA_SERVANT"} -- NPCs with the same class with be allied to each other
+ENT.InvestigateSoundDistance = 16
 
 ENT.HasMeleeAttack = true -- Should the SNPC have a melee attack?
 ENT.TimeUntilMeleeAttackDamage = false -- This counted in seconds | This calculates the time until it hits something
@@ -197,6 +198,7 @@ function ENT:CustomOnAcceptInput(key,activator,caller,data)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
+	self:SetNW2Entity("Enemy",self:GetEnemy())
 	for _,v in pairs(player.GetAll()) do
 		v.Amnesia_NextStatusChangeT = v.Amnesia_NextStatusChangeT or CurTime() +5
 		v.Amnesia_RemoveFromTableT = v.Amnesia_RemoveFromTableT or CurTime() +1
@@ -208,16 +210,16 @@ function ENT:CustomOnThink()
 			end
 		end
 		if v == self:GetEnemy() then
-			v:SetNWInt("VJ_AmnesiaTrack",2)
+			v:SetNW2Int("VJ_AmnesiaTrack",2)
 			v.Amnesia_NextStatusChangeT = CurTime() +5
-			v.Amnesia_RemoveFromTableT = CurTime() +30
+			v.Amnesia_RemoveFromTableT = CurTime() +15
 		elseif VJ_HasValue(self.PreviousEnemies,v) then
 			if CurTime() > v.Amnesia_NextStatusChangeT then
-				v:SetNWInt("VJ_AmnesiaTrack",1)
+				v:SetNW2Int("VJ_AmnesiaTrack",1)
 			end
 		else
 			if CurTime() > v.Amnesia_NextStatusChangeT then
-				v:SetNWInt("VJ_AmnesiaTrack",0)
+				v:SetNW2Int("VJ_AmnesiaTrack",0)
 			end
 		end
 	end

@@ -8,7 +8,7 @@ include('shared.lua')
 ENT.Model = {"models/cpthazama/amnesia/suitor.mdl"} -- The game will pick a random model from the table when the SNPC is spawned | Add as many as you want
 ENT.StartHealth = 180
 ENT.SightDistance = 20
-ENT.InvestigateSoundDistance = 15
+ENT.InvestigateSoundDistance = 25
 
 ENT.VJ_NPC_Class = {"CLASS_AMNESIA_SERVANT"} -- NPCs with the same class with be allied to each other
 

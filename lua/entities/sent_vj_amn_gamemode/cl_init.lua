@@ -9,9 +9,11 @@ net.Receive("vj_amn_sound",function(len,ply)
 end)
 
 surface.CreateFont("VJ_Amnesia",{
-	font = "Trebuchet24",
+	font = "The Black Bible",
 	size = 40,
 })
+
+ENT.PlayerMusic = {}
 
 function ENT:Initialize()
 	hook.Add("HUDPaint","VJ_Amnesia_HUD",function()
@@ -53,6 +55,35 @@ function ENT:Draw()
 	return false
 end
 
-function ENT:Think()
+function ENT:OnRemove()
+	for _,v in pairs(self.PlayerMusic) do
+		if v.Music then
+			v.Music:Stop()
+		end
+	end
+end
 
+function ENT:Think()
+	for _,v in pairs(player.GetAll()) do
+		local found = false
+		for _,ply in pairs(self.PlayerMusic) do
+			if ply.Player == v then
+				found = true
+				break
+			end
+		end
+		if !found then
+			local index = #self.PlayerMusic +1
+			self.PlayerMusic[index] = {Player = v,Music = nil}
+			sound.PlayFile("sound/music/background.mp3","noplay noblock",function(soundchannel,errorID,errorName)
+				if IsValid(soundchannel) then
+					soundchannel:Play()
+					soundchannel:EnableLooping(true)
+					soundchannel:SetVolume(0.7)
+					soundchannel:SetPlaybackRate(1)
+					self.PlayerMusic[index].Music = soundchannel
+				end
+			end)
+		end
+	end
 end

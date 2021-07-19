@@ -15,7 +15,7 @@ ENT.HullType = HULL_HUMAN
 ENT.Behavior = VJ_BEHAVIOR_PASSIVE
 ENT.VJ_NPC_Class = {"CLASS_PLAYER_ALLY"} -- NPCs with the same class with be allied to each other
 ENT.FriendsWithAllPlayerAllies = true
-ENT.IdleAlwaysWander = true
+-- ENT.IdleAlwaysWander = true
 ENT.FollowPlayer = false
 
 ENT.BloodColor = "Red"
@@ -25,6 +25,10 @@ ENT.CombatFaceEnemy = false
 ENT.DisableWeapons = true
 ENT.Weapon_NoSpawnMenu = true -- If set to true, the NPC weapon setting in the spawnmenu will not be applied for this SNPC
 ENT.HasGrenadeAttack = false -- Should the SNPC have a grenade attack?
+
+ENT.AlertFriendsOnDeath = false
+ENT.DisableCallForBackUpOnDamageAnimation = true
+ENT.CallForBackUpOnDamage = false
 
 ENT.AnimTbl_IdleStand = {ACT_HL2MP_IDLE}
 ENT.AnimTbl_Walk = {ACT_HL2MP_WALK,ACT_HL2MP_RUN}
@@ -38,14 +42,28 @@ ENT.FootStepTimeRun = 0.3
 ENT.FootStepTimeWalk = 0.5
 
 ENT.CurrentItem = NULL
+ENT.CurrentCheckPos = Vector(0,0,0)
+ENT.NextCheckPosT = 0
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:GetSightDirection()
 	return self:GetAttachment(self:LookupAttachment("eyes")).Ang:Forward()
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:CustomOnThink()
+function ENT:CustomOnInitialize()
+	self:CapabilitiesAdd(bit.bor(CAP_MOVE_JUMP))
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:CustomOnThink_AIEnabled()
+	self:SetArrivalActivity(ACT_HL2MP_IDLE)
 	if !IsValid(self.CurrentItem) then
 		-- self.IdleAlwaysWander = true
+		if CurTime() > self.NextCheckPosT then
+			local checkPos = Amn_FindRandomNavArea()
+			self.CurrentCheckPos = checkPos != false && checkPos or self:GetPos()
+			self:SetLastPosition(self.CurrentCheckPos)
+			self:VJ_TASK_GOTO_LASTPOS("TASK_WALK_PATH")
+			self.NextCheckPosT = CurTime() +self:GetPathTimeToGoal() +math.Rand(5,10)
+		end
 		for _,v in pairs(ents.FindInSphere(self:GetPos(),350)) do
 			if v.VJ_AmnesiaItem then
 				self.CurrentItem = v

@@ -34,9 +34,13 @@ function ENT:Initialize()
 	self:SetMoveType(MOVETYPE_VPHYSICS)
 	self:SetSolid(SOLID_VPHYSICS)
 	self:SetUseType(SIMPLE_USE)
-	-- self:SetPos(Entity(1):GetPos() + Vector(0,0,15))
-	self:SetPos(self:GetPos() +Vector(0,0,10))
+	-- timer.Simple(0.1,function() self:SetPos(Entity(1):GetPos() + Vector(0,0,15)) end)
+	self:SetPos(self:GetPos() +Vector(0,0,(self:GetModel() == "models/props_c17/lamp001a.mdl" && 10 or 1)))
 	self:SetMaterial("models/XQM/LightLinesRed_tool")
+
+	self.Loop = CreateSound(self,"ambient/atmosphere/ambience6.wav")
+	self.Loop:SetSoundLevel(60)
+	self.Loop:Play()
 
 	local StartLight1 = ents.Create("light_dynamic")
 	StartLight1:SetKeyValue("brightness", "1")
@@ -91,4 +95,8 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:OnTakeDamage(dmginfo)
 	self:GetPhysicsObject():AddVelocity(dmginfo:GetDamageForce() * 0.1)
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:OnRemove()
+	self.Loop:Stop()
 end

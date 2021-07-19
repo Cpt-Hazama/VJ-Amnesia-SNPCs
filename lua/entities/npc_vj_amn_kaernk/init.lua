@@ -51,6 +51,7 @@ function ENT:CustomOnInitialize()
 	self:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 	self:SetNoDraw(true)
 	self:DrawShadow(false)
+	self.PreviousEnemies = {}
 	-- if self:WaterLevel() < 1 then self:Remove() end
 	timer.Simple(0.02,function()
 		if IsValid(self) then
@@ -121,6 +122,7 @@ function ENT:Water_MoveToLocation(ent)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
+	self:SetNW2Entity("Enemy",self:GetEnemy())
 	if IsValid(self.LastHeardEntity) then
 		self.SightDistance = 1000
 		self:Water_MoveToLocation(self.LastHeardEntity)
@@ -130,6 +132,30 @@ function ENT:CustomOnThink()
 		end
 	else
 		self.SightDistance = 0
+	end
+	for _,v in pairs(player.GetAll()) do
+		v.Amnesia_NextStatusChangeT = v.Amnesia_NextStatusChangeT or CurTime() +5
+		v.Amnesia_RemoveFromTableT = v.Amnesia_RemoveFromTableT or CurTime() +1
+		if CurTime() > v.Amnesia_RemoveFromTableT && VJ_HasValue(self.PreviousEnemies,v) then
+			for i,n in pairs(self.PreviousEnemies) do
+				if n == v then
+					table.remove(self.PreviousEnemies,i)
+				end
+			end
+		end
+		if v == self:GetEnemy() then
+			v:SetNW2Int("VJ_AmnesiaTrack",2)
+			v.Amnesia_NextStatusChangeT = CurTime() +5
+			v.Amnesia_RemoveFromTableT = CurTime() +15
+		elseif VJ_HasValue(self.PreviousEnemies,v) then
+			if CurTime() > v.Amnesia_NextStatusChangeT then
+				v:SetNW2Int("VJ_AmnesiaTrack",1)
+			end
+		else
+			if CurTime() > v.Amnesia_NextStatusChangeT then
+				v:SetNW2Int("VJ_AmnesiaTrack",0)
+			end
+		end
 	end
 	if !IsValid(self:GetEnemy()) then
 		for _,v in pairs(ents.FindInSphere(self:GetPos(),1000)) do
@@ -142,7 +168,7 @@ function ENT:CustomOnThink()
 							self:Water_MoveToLocation(v)
 						end
 						self:CustomOnInvestigate(v)
-						self:InvestigateSoundCode()
+						self:PlaySoundSystem("InvestigateSound")
 						self.NextInvestigateSoundMove = CurTime() + 2
 					end
 				end
