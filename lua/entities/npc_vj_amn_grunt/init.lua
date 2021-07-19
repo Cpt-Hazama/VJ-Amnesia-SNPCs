@@ -94,12 +94,14 @@ ENT.Enemy_Type = 0
 	-- 4 = Pig
 	-- 5 = Pig Engie
 	-- 6 = Pig Tesla
+ENT.BaseDamage = 35
 ENT.TrackLevel = 0.1
 ENT.Tracks = {
 	[1] = "music/search_grunt.wav",
 	[2] = "music/att_grunt.wav",
 	[3] = "music/ui_terror_meter.wav",
 }
+ENT.PreviousEnemies = {}
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize()
 	self.BaseDistance = self.MeleeAttackDistance
@@ -135,7 +137,7 @@ function ENT:CustomOnInitialize()
 		self.BaseDamage = 50
 		self.HasLongAttack = false
 	end
-	if self:GetModel() == "models/cpthazama/amnesia/p_tesla.mdl" then
+	if self:GetModel() == "models/cpthazama/amnesia/tesla.mdl" then
 		self.Enemy_Type = 6
 		self.BaseDamage = 95
 		self.HasLongAttack = false
@@ -152,9 +154,11 @@ function ENT:CustomOnInitialize()
 		self:DeleteOnRemove(self.Glow)
 	end
 end
-
 ---------------------------------------------------------------------------------------------------------------------------------------------
-function ENT:CustomOnAlert()
+function ENT:CustomOnAlert(ent)
+	if !VJ_HasValue(self.PreviousEnemies,ent) then
+		table.insert(self.PreviousEnemies,ent)
+	end
 	if math.random(1,4) == 1 then
 		self:VJ_ACT_PLAYACTIVITY({ACT_SIGNAL1,ACT_SIGNAL2},true,false,true)
 	end
@@ -195,19 +199,32 @@ end
 function ENT:CustomOnThink()
 	for _,v in pairs(player.GetAll()) do
 		v.Amnesia_NextStatusChangeT = v.Amnesia_NextStatusChangeT or CurTime() +5
-		if VJ_HasValue(self.CurrentReachableEnemies,v) then
+		v.Amnesia_RemoveFromTableT = v.Amnesia_RemoveFromTableT or CurTime() +1
+		if CurTime() > v.Amnesia_RemoveFromTableT && VJ_HasValue(self.PreviousEnemies,v) then
+			for i,n in pairs(self.PreviousEnemies) do
+				if n == v then
+					table.remove(self.PreviousEnemies,i)
+				end
+			end
+		end
+		if v == self:GetEnemy() then
 			v:SetNWInt("VJ_AmnesiaTrack",2)
 			v.Amnesia_NextStatusChangeT = CurTime() +5
-		else
+			v.Amnesia_RemoveFromTableT = CurTime() +30
+		elseif VJ_HasValue(self.PreviousEnemies,v) then
 			if CurTime() > v.Amnesia_NextStatusChangeT then
 				v:SetNWInt("VJ_AmnesiaTrack",1)
+			end
+		else
+			if CurTime() > v.Amnesia_NextStatusChangeT then
+				v:SetNWInt("VJ_AmnesiaTrack",0)
 			end
 		end
 	end
 	if VJ_AnimationExists(self,ACT_OPEN_DOOR) then
 		if !IsValid(self.DoorToBreak) then
 			for _,v in pairs(ents.FindInSphere(self:GetPos(),50)) do
-				if v:GetClass() == "prop_door_rotating" then
+				if v:GetClass() == "prop_door_rotating" && v:Visible(self) then
 					local anim = string.lower(v:GetSequenceName(v:GetSequence()))
 					if string.find(anim,"idle") then
 						self.DoorToBreak = v

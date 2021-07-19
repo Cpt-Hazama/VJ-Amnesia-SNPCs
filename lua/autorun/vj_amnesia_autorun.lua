@@ -16,6 +16,9 @@ if VJExists == true then
 	include('autorun/vj_controls.lua')
 
 	local vCat = "Amnesia: The Dark Descent"
+	VJ.AddNPC("(Gamemode) Artifact Mode","sent_vj_amn_gamemode",vCat)
+	VJ.AddNPC("(Gamemode) Bot","npc_vj_amn_bot",vCat)
+
 	VJ.AddNPC("Kaernk","npc_vj_amn_kaernk",vCat)
 	VJ.AddNPC("Servant Grunt","npc_vj_amn_grunt",vCat)
 	VJ.AddNPC("Servant Brute","npc_vj_amn_brute",vCat)
@@ -26,6 +29,32 @@ if VJExists == true then
 	VJ.AddNPC("Pigman Tesla","npc_vj_amn_pigtes",vCat)
 
 	VJ.AddParticle("particles/door_explosion.pcf",{"door_pound_core","door_exposion_chunks"})
+
+	VJ.FindHiddenNavArea = function(water)
+		local tbl = {}
+		if !navmesh then return tbl end
+		local function VisToPlayers(area)
+			for _,v in pairs(player.GetAll()) do
+				if area:IsVisible(v:EyePos()) then
+					return true
+				end
+			end
+			return false
+		end
+		local navAreas = navmesh.GetAllNavAreas()
+		for _,v in pairs(navAreas) do
+			if !IsValid(v) then continue end
+			if VisToPlayers(v) then continue end
+			if water && !v:IsUnderwater() then continue end
+			for _,vec in pairs(v:GetHidingSpots()) do
+				table.insert(tbl,vec)
+			end
+		end
+		return VJ_PICK(tbl)
+	end
+
+	VJ.AddConVar("vj_amn_gm_count", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+	VJ.AddConVar("vj_amn_gm_itemcount", 8, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	
 -- !!!!!! DON'T TOUCH ANYTHING BELOW THIS !!!!!! -------------------------------------------------------------------------------------------------------------------------
 	AddCSLuaFile(AutorunFile)

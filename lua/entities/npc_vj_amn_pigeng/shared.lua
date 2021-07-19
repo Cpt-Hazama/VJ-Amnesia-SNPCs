@@ -19,6 +19,7 @@ if CLIENT then
 	end
 
 	function ENT:StartTrack(ent,track)
+		if !self.Tracks[track] then return end
 		ent.VJ_AmnesiaTrack = CreateSound(ent,self.Tracks[track])
 		ent.VJ_AmnesiaTrack:SetSoundLevel(self.TrackLevel)
 		ent.VJ_AmnesiaTrackEntity = self
@@ -37,6 +38,7 @@ if CLIENT then
 			self:StartTrack(ent,track)
 		end
 		if CurTime() > ent.VJ_AmnesiaTrackT then
+			if !self.Tracks[track] then return end
 			ent.VJ_AmnesiaTrack:Stop()
 			ent.VJ_AmnesiaTrack:Play()
 			ent.VJ_AmnesiaTrackT = CurTime() +SoundDuration(self.Tracks[track])

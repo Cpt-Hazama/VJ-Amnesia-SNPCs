@@ -133,7 +133,7 @@ function ENT:OnSoundDetected(data,ent)
 					self:SetLastPosition(ent:GetPos())
 					self:VJ_TASK_GOTO_LASTPOS("TASK_WALK_PATH")
 				end
-				self:InvestigateSoundCode()
+				self:PlaySoundSystem("InvestigateSound")
 				self.NextInvestigateSoundMove = CurTime() + 2
 			end
 		end
@@ -159,7 +159,7 @@ function ENT:OnThink()
 							-- self:VJ_TASK_GOTO_LASTPOS("TASK_WALK_PATH")
 						-- end
 						-- self:CustomOnInvestigate(v)
-						-- self:InvestigateSoundCode()
+						-- self:PlaySoundSystem("InvestigateSound")
 						-- self.NextInvestigateSoundMove = CurTime() + 2
 					-- end
 				-- end
