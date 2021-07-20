@@ -47,6 +47,8 @@ if VJExists == true then
 
 	if CLIENT then
 		hook.Add("PlayerDeath","VJ_AmnSpawnMusic",function(ply)
+			ply.VJ_AmnesiaTrackID = 0
+			ply.VJ_AmnesiaTrackLastID = -1
 			if ply.VJ_AmnesiaTracks then
 				for _,v in SortedPairs(ply.VJ_AmnesiaTracks) do
 					if v && IsValid(v.channel) then
@@ -225,8 +227,24 @@ if VJExists == true then
 		return VJ_PICK(tbl)
 	end
 
-	VJ.AddConVar("vj_amn_gm_count", 1, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+	VJ.AddConVar("vj_amn_gm_count", 2, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	VJ.AddConVar("vj_amn_gm_itemcount", 8, {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+
+	if CLIENT then
+		hook.Add("PopulateToolMenu", "VJ_ADDTOMENU_AMNESIA", function()
+			spawnmenu.AddToolMenuOption("DrVrej", "SNPC Configures", "Amnesia", "Amnesia", "", "", function(Panel)
+				if !game.SinglePlayer() && !LocalPlayer():IsAdmin() then
+					Panel:AddControl("Label", {Text = "#vjbase.menu.general.admin.not"})
+					Panel:AddControl( "Label", {Text = "#vjbase.menu.general.admin.only"})
+					return
+				end
+				Panel:AddControl("Label", {Text = "#vjbase.menu.general.admin.only"})
+				Panel:AddControl("Button", {Text = "#vjbase.menu.general.reset.everything", Command = "vj_amn_gm_count 2\nvj_amn_gm_itemcount 8"})
+				Panel:AddControl("Slider", {Label = "Max Monster Count", min = 0, max = 7, Command = "vj_amn_gm_count"})
+				Panel:AddControl("Slider", {Label = "Max Artifact Count", min = 5, max = 50, Command = "vj_amn_gm_itemcount"})
+			end)
+		end)
+	end
 	
 -- !!!!!! DON'T TOUCH ANYTHING BELOW THIS !!!!!! -------------------------------------------------------------------------------------------------------------------------
 	AddCSLuaFile(AutorunFile)

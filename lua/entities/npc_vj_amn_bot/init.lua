@@ -31,11 +31,11 @@ ENT.DisableCallForBackUpOnDamageAnimation = true
 ENT.CallForBackUpOnDamage = false
 
 ENT.AnimTbl_IdleStand = {ACT_HL2MP_IDLE}
-ENT.AnimTbl_Walk = {ACT_HL2MP_WALK,ACT_HL2MP_RUN}
+ENT.AnimTbl_Walk = {ACT_HL2MP_RUN}
 ENT.AnimTbl_Run = {ACT_HL2MP_RUN}
 ENT.AnimTbl_TakingCover = {ACT_HL2MP_IDLE_CROUCH}
 ENT.AnimTbl_MoveToCover = {ACT_HL2MP_WALK_CROUCH}
--- ENT.AnimTbl_ScaredBehaviorStand = {ACT_HL2MP_IDLE_CROUCH}
+ENT.AnimTbl_ScaredBehaviorStand = {ACT_HL2MP_IDLE_CROUCH}
 ENT.AnimTbl_AlertFriendsOnDeath = {nil}
 
 ENT.FootStepTimeRun = 0.3
@@ -51,31 +51,37 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize()
 	self:CapabilitiesAdd(bit.bor(CAP_MOVE_JUMP))
+	if self:GetModel() == "models/error.mdl" then
+		self:Remove()
+	end
+	self.AnimTbl_ScaredBehaviorStand = {ACT_HL2MP_IDLE_CROUCH}
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink_AIEnabled()
 	self:SetArrivalActivity(ACT_HL2MP_IDLE)
-	if !IsValid(self.CurrentItem) then
-		-- self.IdleAlwaysWander = true
-		if CurTime() > self.NextCheckPosT then
-			local checkPos = Amn_FindRandomNavArea()
-			self.CurrentCheckPos = checkPos != false && checkPos or self:GetPos()
-			self:SetLastPosition(self.CurrentCheckPos)
-			self:VJ_TASK_GOTO_LASTPOS("TASK_WALK_PATH")
-			self.NextCheckPosT = CurTime() +self:GetPathTimeToGoal() +math.Rand(5,10)
-		end
-		for _,v in pairs(ents.FindInSphere(self:GetPos(),350)) do
-			if v.VJ_AmnesiaItem then
-				self.CurrentItem = v
-				-- self.IdleAlwaysWander = false
-				break
+	if !IsValid(self:GetEnemy()) then
+		if !IsValid(self.CurrentItem) then
+			-- self.IdleAlwaysWander = true
+			if CurTime() > self.NextCheckPosT then
+				local checkPos = Amn_FindRandomNavArea()
+				self.CurrentCheckPos = checkPos != false && checkPos or self:GetPos()
+				self:SetLastPosition(self.CurrentCheckPos)
+				self:VJ_TASK_GOTO_LASTPOS("TASK_WALK_PATH")
+				self.NextCheckPosT = CurTime() +self:GetPathTimeToGoal() +math.Rand(5,10)
 			end
-		end
-	else
-		self:SetLastPosition(self.CurrentItem:GetPos())
-		self:VJ_TASK_GOTO_LASTPOS("TASK_WALK_PATH")
-		if self.CurrentItem:GetPos():Distance(self:GetPos()) <= 100 then
-			self.CurrentItem:Use(self)
+			for _,v in pairs(ents.FindInSphere(self:GetPos(),350)) do
+				if v.VJ_AmnesiaItem then
+					self.CurrentItem = v
+					-- self.IdleAlwaysWander = false
+					break
+				end
+			end
+		else
+			self:SetLastPosition(self.CurrentItem:GetPos())
+			self:VJ_TASK_GOTO_LASTPOS("TASK_WALK_PATH")
+			if self.CurrentItem:GetPos():Distance(self:GetPos()) <= 100 then
+				self.CurrentItem:Use(self)
+			end
 		end
 	end
 

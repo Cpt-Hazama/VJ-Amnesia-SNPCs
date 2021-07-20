@@ -13,6 +13,14 @@ ENT.BloodColor = "Red" -- The blood type, this will determine what it should use
 ENT.VJ_NPC_Class = {"CLASS_AMNESIA_SERVANT"} -- NPCs with the same class with be allied to each other
 ENT.InvestigateSoundDistance = 16
 
+ENT.VJC_Data = {
+	CameraMode = 1, -- Sets the default camera mode | 1 = Third Person, 2 = First Person
+	ThirdP_Offset = Vector(0, 25, -30), -- The offset for the controller when the camera is in third person
+	FirstP_Bone = "bone0000", -- If left empty, the base will attempt to calculate a position for first person
+	FirstP_Offset = Vector(5, 0, 5), -- The offset for the controller when the camera is in first person
+	FirstP_ShrinkBone = true, -- Should the bone shrink? Useful if the bone is obscuring the player's view
+}
+
 ENT.HasMeleeAttack = true -- Should the SNPC have a melee attack?
 ENT.TimeUntilMeleeAttackDamage = false -- This counted in seconds | This calculates the time until it hits something
 ENT.MeleeAttackDistance = 50 -- How close does it have to be until it attacks?
@@ -20,70 +28,6 @@ ENT.MeleeAttackDamageDistance = 80 -- How far does the damage go?
 
 ENT.HasExtraMeleeAttackSounds = true -- Set to true to use the extra melee attack sounds
 ENT.DisableFootStepSoundTimer = true -- If set to true, it will disable the time system for the footstep sound code, allowing you to use other ways like model events
-	-- ====== Sound File Paths ====== --
--- Leave blank if you don't want any sounds to play
-ENT.SoundTbl_Walk = {
-	"monsters/grunt/leather_walk01.wav",
-	"monsters/grunt/leather_walk02.wav",
-	"monsters/grunt/leather_walk03.wav",
-	"monsters/grunt/leather_walk04.wav",
-}
-ENT.SoundTbl_Run = {
-	"monsters/grunt/leather_run01.wav",
-	"monsters/grunt/leather_run02.wav",
-	"monsters/grunt/leather_run03.wav",
-	"monsters/grunt/leather_run04.wav",
-}
-ENT.SoundTbl_Idle = {
-	"monsters/grunt/amb_idle01.wav",
-	"monsters/grunt/amb_idle02.wav",
-	"monsters/grunt/amb_idle03.wav",
-	"monsters/grunt/amb_idle04.wav",
-	"monsters/grunt/amb_idle05.wav",
-	"monsters/grunt/amb_idle_scratch01.wav",
-	"monsters/grunt/amb_idle_scratch02.wav",
-	"monsters/grunt/amb_idle_scratch03.wav",
-	"monsters/grunt/amb_idle_whimp01.wav",
-	"monsters/grunt/amb_idle_whimp02.wav",
-}
-ENT.SoundTbl_CombatIdle = {
-	"monsters/grunt/amb_hunt01.wav",
-	"monsters/grunt/amb_hunt02.wav",
-	"monsters/grunt/amb_hunt03.wav",
-	"monsters/grunt/amb_hunt04.wav",
-}
-ENT.SoundTbl_Alert = {
-	"monsters/grunt/enabled01.wav",
-	"monsters/grunt/enabled02.wav",
-	"monsters/grunt/enabled03.wav",
-}
-ENT.SoundTbl_Investigate = {
-	"monsters/grunt/amb_alert01.wav",
-	"monsters/grunt/amb_alert02.wav",
-	"monsters/grunt/amb_alert03.wav",
-	"monsters/grunt/notice01.wav",
-	"monsters/grunt/notice02.wav",
-	"monsters/grunt/notice03.wav",
-	"monsters/grunt/notice04.wav",
-	"monsters/grunt/notice_long01.wav",
-	"monsters/grunt/notice_long02.wav",
-	"monsters/grunt/notice_long03.wav",
-}
-ENT.SoundTbl_NormalAttack = {
-	"monsters/grunt/attack_claw01.wav",
-	"monsters/grunt/attack_claw02.wav",
-	"monsters/grunt/attack_claw03.wav",
-}
-ENT.SoundTbl_LaunchAttack = {
-	"monsters/grunt/attack_launch01.wav",
-	"monsters/grunt/attack_launch02.wav",
-	"monsters/grunt/attack_launch03.wav",
-}
-ENT.SoundTbl_MeleeAttackExtra = {
-	"monsters/grunt/attack_claw_hit01.wav",
-	"monsters/grunt/attack_claw_hit02.wav",
-	"monsters/grunt/attack_claw_hit03.wav",
-}
 
 ENT.GeneralSoundPitch1 = 100
 
@@ -119,6 +63,68 @@ function ENT:CustomOnInitialize()
 			self:SetMaxHealth(hp)
 			self.BaseDamage = 95
 		end
+		self.SoundTbl_Walk = {
+			"monsters/grunt/leather_walk01.wav",
+			"monsters/grunt/leather_walk02.wav",
+			"monsters/grunt/leather_walk03.wav",
+			"monsters/grunt/leather_walk04.wav",
+		}
+		self.SoundTbl_Run = {
+			"monsters/grunt/leather_run01.wav",
+			"monsters/grunt/leather_run02.wav",
+			"monsters/grunt/leather_run03.wav",
+			"monsters/grunt/leather_run04.wav",
+		}
+		self.SoundTbl_Idle = {
+			"monsters/grunt/amb_idle01.wav",
+			"monsters/grunt/amb_idle02.wav",
+			"monsters/grunt/amb_idle03.wav",
+			"monsters/grunt/amb_idle04.wav",
+			"monsters/grunt/amb_idle05.wav",
+			"monsters/grunt/amb_idle_scratch01.wav",
+			"monsters/grunt/amb_idle_scratch02.wav",
+			"monsters/grunt/amb_idle_scratch03.wav",
+			"monsters/grunt/amb_idle_whimp01.wav",
+			"monsters/grunt/amb_idle_whimp02.wav",
+		}
+		self.SoundTbl_CombatIdle = {
+			"monsters/grunt/amb_hunt01.wav",
+			"monsters/grunt/amb_hunt02.wav",
+			"monsters/grunt/amb_hunt03.wav",
+			"monsters/grunt/amb_hunt04.wav",
+		}
+		self.SoundTbl_Alert = {
+			"monsters/grunt/enabled01.wav",
+			"monsters/grunt/enabled02.wav",
+			"monsters/grunt/enabled03.wav",
+		}
+		self.SoundTbl_Investigate = {
+			"monsters/grunt/amb_alert01.wav",
+			"monsters/grunt/amb_alert02.wav",
+			"monsters/grunt/amb_alert03.wav",
+			"monsters/grunt/notice01.wav",
+			"monsters/grunt/notice02.wav",
+			"monsters/grunt/notice03.wav",
+			"monsters/grunt/notice04.wav",
+			"monsters/grunt/notice_long01.wav",
+			"monsters/grunt/notice_long02.wav",
+			"monsters/grunt/notice_long03.wav",
+		}
+		self.SoundTbl_NormalAttack = {
+			"monsters/grunt/attack_claw01.wav",
+			"monsters/grunt/attack_claw02.wav",
+			"monsters/grunt/attack_claw03.wav",
+		}
+		self.SoundTbl_LaunchAttack = {
+			"monsters/grunt/attack_launch01.wav",
+			"monsters/grunt/attack_launch02.wav",
+			"monsters/grunt/attack_launch03.wav",
+		}
+		self.SoundTbl_MeleeAttackExtra = {
+			"monsters/grunt/attack_claw_hit01.wav",
+			"monsters/grunt/attack_claw_hit02.wav",
+			"monsters/grunt/attack_claw_hit03.wav",
+		}
 	end
 	if self:GetModel() == "models/cpthazama/amnesia/special.mdl" then
 		self.Enemy_Type = 2
@@ -154,6 +160,11 @@ function ENT:CustomOnInitialize()
 		self.Glow:Fire("TurnOn","",0)
 		self:DeleteOnRemove(self.Glow)
 	end
+	-- for i = 1,128 do
+	-- 	if self:GetBoneName(i) then
+	-- 		print(self:GetBoneName(i))
+	-- 	end
+	-- end
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnAlert(ent)

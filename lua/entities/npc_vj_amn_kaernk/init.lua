@@ -46,12 +46,35 @@ ENT.LastHeardEntity = NULL
 ENT.LastHeardT = CurTime()
 ENT.LastSeenEnemyTimeUntilReset = 3.5
 ENT.MoveNum = 0
+
+util.AddNetworkString("vj_amn_hud_blind")
+---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Controller_Initialize(ply)
+    net.Start("vj_amn_hud_blind")
+		net.WriteBool(false)
+		net.WriteEntity(self)
+    net.Send(ply)
+
+	function self.VJ_TheControllerEntity:CustomOnStopControlling()
+		net.Start("vj_amn_hud_blind")
+			net.WriteBool(true)
+			net.WriteEntity(self)
+		net.Send(ply)
+	end
+end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInitialize()
 	self:SetCollisionGroup(COLLISION_GROUP_IN_VEHICLE)
 	self:SetNoDraw(true)
 	self:DrawShadow(false)
 	self.PreviousEnemies = {}
+
+	-- local obj = ents.Create("obj_vj_npccontroller")
+	-- obj.VJCE_Player = Entity(1)
+	-- obj:SetControlledNPC(self)
+	-- obj:Spawn()
+	-- obj:StartControlling()
+
 	-- if self:WaterLevel() < 1 then self:Remove() end
 	timer.Simple(0.02,function()
 		if IsValid(self) then
@@ -72,7 +95,7 @@ end
 function ENT:CustomOnMeleeAttack_AfterStartTimer()
 	local effectdata = EffectData()
 	effectdata:SetOrigin(self:GetPos() +Vector(0,0,5))
-	effectdata:SetScale(10)
+	effectdata:SetScale(20)
 	util.Effect("watersplash",effectdata)
 end
 ---------------------------------------------------------------------------------------------------------------------------------------------
@@ -100,6 +123,7 @@ function ENT:Water_MoveToLocation(ent)
 		for i = 1,dist *0.15 do
 			timer.Simple(i *speed,function()
 				if IsValid(self) && self.MoveNum == mOrder then
+					if self.VJ_IsBeingControlled && !self.VJ_TheController:KeyDown(IN_FORWARD) then return end
 					if !IsValid(ent) then return end
 					-- if ent:WaterLevel() < 1 then return end
 					local tr = util.TraceLine({
@@ -109,10 +133,10 @@ function ENT:Water_MoveToLocation(ent)
 					})
 					-- if tr.Hit then return end
 					if math.random(1,3) == 1 then
-					local effectdata = EffectData()
-					effectdata:SetOrigin(self:GetPos() +Vector(0,0,5))
-					effectdata:SetScale(9)
-					util.Effect("watersplash",effectdata)
+						local effectdata = EffectData()
+						effectdata:SetOrigin(self:GetPos() +Vector(0,0,5))
+						effectdata:SetScale(9)
+						util.Effect("watersplash",effectdata)
 					end
 					self:SetPos(self:GetPos() +self:GetForward() *(dist /push))
 				end
@@ -123,15 +147,23 @@ end
 ---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnThink()
 	self:SetNW2Entity("Enemy",self:GetEnemy())
-	if IsValid(self.LastHeardEntity) then
-		self.SightDistance = 1000
-		self:Water_MoveToLocation(self.LastHeardEntity)
-		if self.LastHeardEntity:WaterLevel() <= 0 then
-			self.LastHeardEntity = NULL
-			self:SetEnemy(NULL)
+	if self.VJ_IsBeingControlled then
+		if self.VJ_TheController:KeyDown(IN_FORWARD) then
+			self:Water_MoveToLocation(self.VJ_TheControllerBullseye)
+		else
+			self:AA_StopMoving()
 		end
 	else
-		self.SightDistance = 0
+		if IsValid(self.LastHeardEntity) then
+			self.SightDistance = 1000
+			self:Water_MoveToLocation(self.LastHeardEntity)
+			if self.LastHeardEntity:WaterLevel() <= 0 then
+				self.LastHeardEntity = NULL
+				self:SetEnemy(NULL)
+			end
+		else
+			self.SightDistance = 0
+		end
 	end
 	for _,v in pairs(player.GetAll()) do
 		v.Amnesia_NextStatusChangeT = v.Amnesia_NextStatusChangeT or CurTime() +5
@@ -157,7 +189,7 @@ function ENT:CustomOnThink()
 			end
 		end
 	end
-	if !IsValid(self:GetEnemy()) then
+	if !IsValid(self:GetEnemy()) && !self.VJ_IsBeingControlled then
 		for _,v in pairs(ents.FindInSphere(self:GetPos(),1000)) do
 			if (v:IsNPC() && v != self && self:Disposition(v) != D_LI) || v:IsPlayer() || v:GetClass() == "prop_physics" then
 				if (v:IsPlayer() && GetConVarNumber("ai_ignoreplayers") == 0 && !v:Crouching() && v:GetMoveType() != MOVETYPE_NOCLIP && v:GetVelocity():Length() > 0) or v:IsNPC() && v:IsMoving() or v:GetClass() == "prop_physics" && IsValid(v:GetPhysicsObject()) && v:GetPhysicsObject():GetVelocity():Length() > 25 then
@@ -186,7 +218,7 @@ function ENT:CustomOnThink()
 			end
 		end
 	end
-	if CurTime() > self.LastHeardT then
+	if CurTime() > self.LastHeardT && !self.VJ_IsBeingControlled then
 		self:SetEnemy(NULL)
 	end
 end

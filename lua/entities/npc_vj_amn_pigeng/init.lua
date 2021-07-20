@@ -9,6 +9,14 @@ ENT.Model = {"models/cpthazama/amnesia/engineer.mdl"} -- The game will pick a ra
 ENT.StartHealth = 200
 ENT.VJ_NPC_Class = {"CLASS_AMNESIA_PIGMAN"} -- NPCs with the same class with be allied to each other
 
+ENT.VJC_Data = {
+	CameraMode = 1, -- Sets the default camera mode | 1 = Third Person, 2 = First Person
+	ThirdP_Offset = Vector(0, 25, -30), -- The offset for the controller when the camera is in third person
+	FirstP_Bone = "Bip001_Head", -- If left empty, the base will attempt to calculate a position for first person
+	FirstP_Offset = Vector(10, 0, 5), -- The offset for the controller when the camera is in first person
+	FirstP_ShrinkBone = true, -- Should the bone shrink? Useful if the bone is obscuring the player's view
+}
+
 	-- ====== Sound File Paths ====== --
 -- Leave blank if you don't want any sounds to play
 ENT.SoundTbl_Walk = {

@@ -33,6 +33,7 @@ function ENT:Initialize()
 			if v:IsPlayer() or v.VJ_AmnesiaBot then
 				players = players +1
 				if (v:IsPlayer() && v:GetMoveType() != MOVETYPE_OBSERVER) or v.VJ_AmnesiaBot then
+					if v:IsPlayer() && GetConVar("ai_ignoreplayers"):GetInt() == 1 then continue end
 					players_alive = players_alive +1
 				end
 			end

@@ -96,6 +96,20 @@ ENT.LastHeardEntity = NULL
 ENT.LastHeardT = CurTime()
 ENT.LastSeenEnemyTimeUntilReset = 5.5
 ---------------------------------------------------------------------------------------------------------------------------------------------
+function ENT:Controller_Initialize(ply)
+    net.Start("vj_amn_hud_blind")
+		net.WriteBool(false)
+		net.WriteEntity(self)
+    net.Send(ply)
+
+	function self.VJ_TheControllerEntity:CustomOnStopControlling()
+		net.Start("vj_amn_hud_blind")
+			net.WriteBool(true)
+			net.WriteEntity(self)
+		net.Send(ply)
+	end
+end
+---------------------------------------------------------------------------------------------------------------------------------------------
 function ENT:CustomOnInvestigate(argent)
 	if argent:IsNPC() || argent:IsPlayer() then
 		self.LastHeardEntity = argent
@@ -166,7 +180,7 @@ function ENT:OnThink()
 			-- end
 		-- end
 	-- end
-	if CurTime() > self.LastHeardT then
+	if CurTime() > self.LastHeardT && !self.VJ_IsBeingControlled then
 		self:SetEnemy(NULL)
 	end
 end

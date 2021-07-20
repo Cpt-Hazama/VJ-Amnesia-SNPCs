@@ -92,6 +92,7 @@ function ENT:Initialize()
 		monster:SetAngles(Angle(0,math.random(0,360),0))
 		monster:Spawn()
 		monster.IdleAlwaysWander = true
+		monster.GodMode = true
 		monster.VJ_NPC_Class = {"CLASS_AMNESIA_SERVANT"}
 		table.insert(self.Monsters,monster)
 		self:DeleteOnRemove(monster)
@@ -106,6 +107,7 @@ function ENT:Initialize()
 		end
 
 		if ply:GetNW2Bool("Amn_Death") then
+			if GetConVar("ai_ignoreplayers"):GetInt() == 1 then return end
 			local controlled = false
 			for _,v in RandomPairs(self.Monsters) do
 				if !v.VJ_IsBeingControlled then
@@ -155,6 +157,7 @@ function ENT:Initialize()
 			return
 		end
 
+		if GetConVar("ai_ignoreplayers"):GetInt() == 1 then return end
 		ply:SetNW2Bool("Amn_Death",true)
 	end)
 end
@@ -177,6 +180,7 @@ function ENT:Think()
 		if (v:IsPlayer() && v:GetMoveType() != MOVETYPE_OBSERVER) or v.VJ_AmnesiaBot then
 			if v:IsPlayer() then
 				if math.random(1,2) == 1 then self:SetPos(v:GetPos()) end -- Prevent HUD from soft-locking
+				if GetConVar("ai_ignoreplayers"):GetInt() == 1 then continue end
 				v:StripWeapons()
 				v:SetRunSpeed(v:GetWalkSpeed())
 			end
